@@ -80,8 +80,11 @@ class Ps_facebook extends Module
         $this->docs_path = $this->_path . 'docs/';
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
-
         $this->compile();
+
+        /** @var \PrestaShop\Module\PrestashopFacebook\Provider\ProductProvider $productProvider */
+        $productProvider = $this->getContainer(\PrestaShop\Module\PrestashopFacebook\Provider\ProductProvider::class);
+        $productProvider->getProducts();
     }
 
     /**

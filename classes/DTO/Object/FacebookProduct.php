@@ -82,7 +82,7 @@ class FacebookProduct implements JsonSerializable
     private $itemGroupId;
 
     /**
-     * @var array
+     * @var string
      */
     private $googleProductCategory;
 
@@ -102,7 +102,7 @@ class FacebookProduct implements JsonSerializable
     private $pattern;
 
     /**
-     * @var array
+     * @var string
      */
     private $productType;
 
@@ -509,7 +509,7 @@ class FacebookProduct implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getGoogleProductCategory()
     {
@@ -517,7 +517,7 @@ class FacebookProduct implements JsonSerializable
     }
 
     /**
-     * @param array $googleProductCategory
+     * @param string $googleProductCategory
      *
      * @return FacebookProduct
      */
@@ -589,7 +589,7 @@ class FacebookProduct implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getProductType()
     {
@@ -597,7 +597,7 @@ class FacebookProduct implements JsonSerializable
     }
 
     /**
-     * @param array $productType
+     * @param string $productType
      *
      * @return FacebookProduct
      */
@@ -1009,7 +1009,7 @@ class FacebookProduct implements JsonSerializable
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function jsonSerialize()
     {

@@ -47,69 +47,60 @@ class ProductProvider implements CatalogProvider
     }
 
     /**
-     * @return FacebookProduct[]|array
+     * @return FacebookProduct
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
     public function getProducts()
     {
-        $shopId = $this->shopId ?: (int)Configuration::get('PS_SHOP_DEFAULT');
-        $isOrderOutOfStockAvailable = (bool)Configuration::get('PS_ORDER_OUT_OF_STOCK');
-        $products = $this->productRepository->getProductsForFacebook((int)Configuration::get('PS_LANG_DEFAULT'));
-        $currencyId = (int)Configuration::get('PS_CURRENCY_DEFAULT');
-        $languages = Language::getLanguages(true);
+        $product = $this->productRepository->getMockedBusData();
 
-        $facebookProducts = [];
+        $facebookProduct = new FacebookProduct();
+        $facebookProduct
+            ->setId($this->buildId($product))
+            ->setTitle($this->buildTitle($product))
+            ->setDescription($this->buildDescription($product))
+            ->setAvailability($this->buildAvailability($product))
+            ->setInventory($this->buildInventory($product))
+            ->setCondition($this->buildCondition($product))
+            ->setPrice($this->buildPrice($product))
+            ->setLink($this->buildLink($product))
+            ->setImageLink($this->buildImageLink($product))
+            ->setBrand($this->buildBrand($product))
+            ->setAdditionalImageLink($this->buildAdditionalImageLink($product))
+            ->setAgeGroup($this->buildAgeGroup($product))
+            ->setColor($this->buildColor($product))
+            ->setGender($this->buildGender())
+            ->setItemGroupId($this->buildItemGroupId($product))
+            ->setGoogleProductCategory($this->buildGoogleProductCategory($product))
+            ->setCommerceTaxCategory($this->buildCommerceTaxCategory($product))
+            ->setMaterial($this->buildMaterial($product))
+            ->setPattern($this->buildPattern($product))
+            ->setProductType($this->buildProductType($product))
+            ->setSalePrice($this->buildSalePrice($product))
+            ->setSalePriceEffectiveDate($this->buildSalePriceEffectiveDate($product))
+            ->setShipping($this->buildShipping($product))
+            ->setShippingWeight($this->buildShippingWeight($product))
+            ->setRichTextDescription($this->buildRichTextDescription($product));
 
-        /** @var array $language */
-        foreach ($languages as $language) {
-            foreach ($products as $product) {
-                $productId = (int)$product['id_product'];
-                $productObj = new Product($productId, false, $language['id_lang']);
-                $facebookProduct = new FacebookProduct();
-                $facebookProduct
-                    ->setId($this->buildId($product))
-                    ->setTitle($this->buildTitle($product))
-                    ->setDescription($this->buildDescription($product))
-                    ->setAvailability($this->buildAvailability($productId, $isOrderOutOfStockAvailable))
-                    ->setInventory($this->buildInventory($productId))
-                    ->setCondition($this->buildCondition($product))
-                    ->setPrice($this->buildPrice($productObj, $currencyId))
-                    ->setLink($this->buildLink($productObj))
-                    ->setImageLink($this->buildImageLink($productObj))
-                    ->setBrand($this->buildBrand($productObj))
-                    ->setAdditionalImageLink($this->buildAdditionalImageLink($productObj, $language['id_lang']))
-                    ->setAgeGroup(null)
-                    ->setColor($this->buildColor($productObj, $language['id_lang']))
-                    ->setGender($this->buildGender())
-                    ->setItemGroupId($this->buildItemGroupId($product))
-                    ->setGoogleProductCategory($this->buildGoogleProductCategory($product, $language['id_lang']))
-                    ->setCommerceTaxCategory($this->buildCommerceTaxCategory())
-                    ->setMaterial($this->buildMaterial())
-                    ->setPattern($this->buildPattern())
-                    ->setProductType($this->buildProductType($product, $language['id_lang']))
-                    ->setSalePrice($this->buildSalePrice($productObj, $currencyId))
-                    ->setSalePriceEffectiveDate($this->buildSalePriceEffectiveDate($productId, $shopId, $currencyId))
-                    ->setShipping($this->buildShipping())
-                    ->setShippingWeight($this->buildShippingWeight($productObj));
 
-                $facebookProducts[] = $facebookProduct;
-            }
-        }
-
-        return $facebookProducts;
+        return $facebookProduct;
     }
 
     /**
      * @param array $product
      *
-     * @return mixed
+     * @return string
      */
     private function buildId(array $product)
     {
-        // todo: Need to find way to generate product id because product has different ids with each attribute
-        return $product['reference'];
+        return implode(
+            '_',
+            [
+                $product['id'],
+            ]
+        );
     }
 
     /**
@@ -119,11 +110,23 @@ class ProductProvider implements CatalogProvider
      */
     private function buildTitle(array $product)
     {
+        $attributes = self::attributeStringToArray($product['combination']);
+        $attributeValues = [];
+        foreach ($attributes as $feature => $value) {
+            $attributeValues[] = $value;
+        }
+        $attributes = implode(
+            ' ',
+            $attributeValues
+
+        );
+
         return implode(
             ' ',
             [
-                $product['product_name'],
-                $product['manufacturer_name'],
+                $attributes,
+                $product['manufacture'],
+                $product['name'],
             ]
         );
     }
@@ -135,7 +138,9 @@ class ProductProvider implements CatalogProvider
      */
     private function buildDescription(array $product)
     {
-        return $product['product_description_short'] ?: $product['product_description'] ?: '';
+        $description = $product['description_short'] ?: $product['description_short'] ?: $product['description'];
+
+        return htmlspecialchars($description);
     }
 
     /**
@@ -144,11 +149,10 @@ class ProductProvider implements CatalogProvider
      *
      * @return string
      */
-    private function buildAvailability($productId, $isOrderOutOfStockAvailable)
+    private function buildAvailability($product)
     {
-        $availableStock = \StockAvailableCore::getQuantityAvailableByProduct($productId);
-
-        // todo: move strings to config const
+        $isOrderOutOfStockAvailable = Configuration::get('PS_ORDER_OUT_OF_STOCK');
+        $availableStock = $product['quantity'];
         switch ($isOrderOutOfStockAvailable) {
             case 1:
                 if ($availableStock <= 0) {
@@ -172,135 +176,94 @@ class ProductProvider implements CatalogProvider
      *
      * @return int
      */
-    private function buildInventory($productId)
+    private function buildInventory($product)
     {
-        return \StockAvailableCore::getQuantityAvailableByProduct($productId);
+        return $product['quantity'];
+    }
+
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildCondition(array $product)
+    {
+        return $product['condition'];
     }
 
     /**
      * @param array $product
      *
      * @return string
-     *
-     * @throws \Exception
      */
-    private function buildCondition(array $product)
+    private function buildPrice($product)
     {
-        $productAddDate = new DateTime($product['date_add']);
-        $productUpdateDate = new DateTime($product['date_upd']);
-        $currentDate = new DateTime();
-
-        if (DateUtility::isDateNewerThenGivenDays($currentDate, $productAddDate)) {
-            return 'new';
-        }
-
-        if (DateUtility::isDateNewerThenGivenDays($currentDate, $productUpdateDate)) {
-            return 'refurbished';
-        }
-
-        return 'used';
+        return str_replace(':', ', ', $product['price']);
     }
 
     /**
-     * @param Product $product
-     * @param int $currencyId
-     *
+     * @param array $product
      * @return string
      *
      */
-    private function buildPrice(Product $product, $currencyId)
+    private function buildLink($product)
     {
-        // todo: need a way to know if price is shown with tax or without
-        $price = $product->getPriceWithoutReduct(false, null, 2);
-        $currency = Currency::getCurrencyInstance($currencyId);
-
-        return "{$price} {$currency->iso_code}";
+        return $product['link'];
     }
 
     /**
-     * @param Product $product
-     * @return string
-     *
-     */
-    private function buildLink(Product $product)
-    {
-        return $product->getLink();
-    }
-
-    /**
-     * @param Product $product
-     * @return string
-     */
-    private function buildImageLink(Product $product)
-    {
-        $productCover = Product::getCover($product->id);
-
-        return Context::getContext()->link->getImageLink($product->link_rewrite, $productCover['id_image']);
-    }
-
-    /**
-     * @param Product $product
-     *
-     * @return string
-     *
-     */
-    private function buildBrand(Product $product)
-    {
-        $manufacturer = new Manufacturer($product->id_manufacturer);
-
-        if (!$manufacturer) {
-            return 'gtin';
-        }
-
-        return $manufacturer->name;
-    }
-
-    /**
-     * @param Product $product
-     * @param int $lang
-     *
-     * @return string
-     *
-     */
-    private function buildAdditionalImageLink(Product $product, $lang)
-    {
-        $productImages = $product->getImages($lang);
-
-        $additionalImageLinks = [];
-        foreach ($productImages as $productImage) {
-            if ($productImage['cover']) {
-                continue;
-            }
-            $imageLink = Context::getContext()->link->getImageLink($product->link_rewrite, $productImage['id_image']);
-            $additionalImageLinks[] = $imageLink;
-        }
-
-        return implode(',', $additionalImageLinks);
-    }
-
-    /**
-     * @param Product $product
-     * @param int $langId
+     * @param array $product
      *
      * @return string
      */
-    private function buildColor(Product $product, $langId)
+    private function buildImageLink(array $product)
     {
-        $productAttributes = $product->getAttributeCombinations($langId);
-
-        $colors = [];
-        foreach ($productAttributes as $productAttribute) {
-            if (!$productAttribute['is_color_group'] || !$productAttribute['default_on']) {
-                continue;
-            }
-            $colors[] = $productAttribute['attribute_name'];
-        }
-
-        return implode(' ', $colors);
+        return $product['imageLink'];
     }
 
     /**
-     * todo: how can we know the gender?
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildBrand(array $product)
+    {
+        return $product['brand'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildAdditionalImageLink(array $product)
+    {
+        return str_replace(':', ',', $product['additionalImageLink']);
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildAgeGroup(array $product)
+    {
+        return '';
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildColor(array $product)
+    {
+        return '';
+    }
+
+    /**
+     * @param array $product
      *
      * @return string
      */
@@ -316,142 +279,126 @@ class ProductProvider implements CatalogProvider
      */
     private function buildItemGroupId(array $product)
     {
-        return $product['product_name'];
-    }
-
-    /**
-     * @param array $product
-     * @param int $langId
-     *
-     * @return array
-     */
-    private function buildGoogleProductCategory(array $product, $langId)
-    {
-        $categoryId = $product['id_category_default'];
-        $category = new Category($categoryId);
-        $parentCategories = $category->getAllParents();
-
-        $googleProductCategory = [];
-        /** @var Category $parentCategory */
-        foreach ($parentCategories as $parentCategory) {
-            $googleProductCategory[$parentCategory->name] = $parentCategory->id_category;
-        }
-        $googleProductCategory[$category->getName($langId)] = $category->id_category;
-
-        return $googleProductCategory;
-    }
-
-    /**
-     * @return string ''
-     * @todo Need more information when to send what category tax or if its even needed
-     */
-    private function buildCommerceTaxCategory()
-    {
-        return '';
-    }
-
-    /**
-     * @return string ''
-     * @todo Need more information or if its even needed
-     *
-     */
-    private function buildMaterial()
-    {
-        return '';
-    }
-
-    /**
-     * @return string ''
-     * @todo Need more information or if its even needed
-     *
-     */
-    private function buildPattern()
-    {
-        return '';
-    }
-
-    /**
-     * @param array $product
-     * @param int $langId
-     *
-     * @return array
-     */
-    private function buildProductType(array $product, $langId)
-    {
-        $categoryId = $product['id_category_default'];
-        $category = new Category($categoryId);
-        $parentCategories = $category->getAllParents();
-
-        $googleProductCategory = [];
-        /** @var Category $parentCategory */
-        foreach ($parentCategories as $parentCategory) {
-            $googleProductCategory[$parentCategory->name] = $parentCategory->id_category;
-        }
-        $googleProductCategory[$category->getName($langId)] = $category->id_category;
-
-        return $googleProductCategory;
-    }
-
-    /**
-     * @param Product $product
-     * @param int $currencyId
-     *
-     * @return string
-     */
-    private function buildSalePrice(Product $product, $currencyId)
-    {
-        // todo: need a way to know if price is shown with tax or without
-        $price = $product->getPrice(true, null, 2);
-        $currency = Currency::getCurrencyInstance($currencyId);
-
-        return "{$price} {$currency->iso_code}";
-    }
-
-    /**
-     * @param int $productId
-     * @param int $shopId
-     * @param int $currencyId
-     *
-     * @return string
-     * @throws \Exception
-     * @todo is it okey if we send date as 00-00-00T00:00:00 if date is not selected?
-     */
-    private function buildSalePriceEffectiveDate($productId, $shopId, $currencyId)
-    {
-        $shop = new Shop($shopId);
-        $specificPrice = SpecificPrice::getSpecificPrice(
-            $productId,
-            $shop->id,
-            $currencyId,
-            0,
-            $shop->getGroup()->id,
-            1
+        return implode(
+            '_',
+            [
+                $product['name'],
+                $product['id'],
+                $product['attributeId'],
+            ]
         );
-
-        $discountDateFrom = DateUtility::formattedDate($specificPrice['from']);
-        $discountDateTo = DateUtility::formattedDate($specificPrice['to']);
-
-        return implode('/', [$discountDateFrom, $discountDateTo]);
     }
 
     /**
+     * @param array $product
+     *
      * @return string
-     * @todo how can we get shipping price if there can be more then one carrier?
      */
-    private function buildShipping()
+    private function buildGoogleProductCategory(array $product)
+    {
+        return $product['category'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildCommerceTaxCategory(array $product)
+    {
+        //todo: do we need to use commerce_tax_category?
+        return '??????';
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildMaterial(array $product)
+    {
+        return $product['material'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildPattern(array $product)
+    {
+        return $product['pattern'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildProductType(array $product)
+    {
+        return $product['category'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildSalePrice(array $product)
+    {
+        return $product['salesPrice'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildSalePriceEffectiveDate(array $product)
+    {
+        return $product['salePriceEffectiveDate'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildShipping(array $product)
+    {
+        return $product['shipping'];
+    }
+
+    /**
+     * @param array $product
+     *
+     * @return string
+     */
+    private function buildShippingWeight(array $product)
+    {
+        return $product['weight'];
+    }
+
+    private function buildRichTextDescription(array $product)
+    {
+        return $product['shortDescription'] ?: $product['shortDescription'] ?: $product['description'];
+    }
+
+    private function buildAdditionalVariantAttribute(array $product)
     {
         return '';
     }
 
-    /**
-     * @param Product $product
-     *
-     * @return string
-     */
-    private function buildShippingWeight(Product $product)
+    private static function attributeStringToArray($attributes, $attributesSeparator = ';', $valueSeparator = ':')
     {
-        $weightUnit = Configuration::get('PS_WEIGHT_UNIT');
+        $attributesArray = explode($attributesSeparator, $attributes);
+        $return = [];
+        foreach ($attributesArray as $attribute) {
+            $attribute = explode($valueSeparator, $attribute);
+            $return[$attribute[0]] = $attribute[1];
+        }
 
-        return "{$product->weight} {$weightUnit}";
+        return $return;
     }
 }

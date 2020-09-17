@@ -1057,16 +1057,16 @@
     "packages-dev": [
         {
             "name": "composer/semver",
-            "version": "1.5.1",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/semver.git",
-                "reference": "c6bea70230ef4dd483e6bbcab6005f682ed3a8de"
+                "reference": "114f819054a2ea7db03287f5efb757e2af6e4079"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/semver/zipball/c6bea70230ef4dd483e6bbcab6005f682ed3a8de",
-                "reference": "c6bea70230ef4dd483e6bbcab6005f682ed3a8de",
+                "url": "https://api.github.com/repos/composer/semver/zipball/114f819054a2ea7db03287f5efb757e2af6e4079",
+                "reference": "114f819054a2ea7db03287f5efb757e2af6e4079",
                 "shasum": ""
             },
             "require": {
@@ -1114,7 +1114,7 @@
                 "validation",
                 "versioning"
             ],
-            "time": "2020-01-13T12:06:48+00:00"
+            "time": "2020-09-09T09:34:06+00:00"
         },
         {
             "name": "composer/xdebug-handler",
@@ -2229,16 +2229,16 @@
         },
         {
             "name": "prestashop/php-dev-tools",
-            "version": "v3.8",
+            "version": "v3.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/php-dev-tools.git",
-                "reference": "6e799a01119d838beaf6466d349f3c77b9fc462d"
+                "reference": "01c27954fbcccbec0a8ad04c913e43832b1343ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/php-dev-tools/zipball/6e799a01119d838beaf6466d349f3c77b9fc462d",
-                "reference": "6e799a01119d838beaf6466d349f3c77b9fc462d",
+                "url": "https://api.github.com/repos/PrestaShop/php-dev-tools/zipball/01c27954fbcccbec0a8ad04c913e43832b1343ad",
+                "reference": "01c27954fbcccbec0a8ad04c913e43832b1343ad",
                 "shasum": ""
             },
             "require": {
@@ -2263,7 +2263,7 @@
                 "MIT"
             ],
             "description": "PrestaShop coding standards",
-            "time": "2020-07-19T14:47:58+00:00"
+            "time": "2020-09-07T08:53:30+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
