@@ -57,6 +57,7 @@ class Ps_facebook extends Module
         'actionObjectCustomerMessageAddAfter',
         'displayFooter',
         'actionNewsletterRegistrationAfter',
+        'actionSubmitAccountBefore',
     ];
 
     const CONFIGURATION_LIST = [
@@ -136,6 +137,7 @@ class Ps_facebook extends Module
         );
         $this->templateBuffer = new TemplateBuffer();
         $this->eventDispatcher = new EventDispatcher($this);
+//        $this->registerHook('actionbeforesubmitaccount');
 
         $dotenv = Dotenv::create(_PS_MODULE_DIR_ . 'ps_facebook/');
         $dotenv->load();
@@ -282,6 +284,13 @@ class Ps_facebook extends Module
     }
 
     public function hookActionNewsletterRegistrationAfter(array $params)
+    {
+        $this->eventDispatcher->dispatch(__FUNCTION__, $params);
+
+        return $this->templateBuffer->flush();
+    }
+
+    public function hookActionSubmitAccountBefore(array $params)
     {
         $this->eventDispatcher->dispatch(__FUNCTION__, $params);
 
