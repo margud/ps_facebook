@@ -196,6 +196,10 @@ export default defineComponent({
     },
   },
   created() {
+    console.log(this.categories)
+    this.categories.forEach((el) => {
+      console.log(el.name)
+    })
     if (this.categories.length === 0) {
       // call php
     }
