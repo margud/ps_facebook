@@ -74,19 +74,21 @@
       [TODO: filter]
     </p>
 
-    [TODO : table component to insert here]
+    <TableMatching :initialCategories="categories"/>
   </b-card>
 </template>
 
 <script>
 import {defineComponent} from '@vue/composition-api';
 import {BButton, BCard} from 'bootstrap-vue';
+import TableMatching from '../category-matching/tableMatching.vue'
 
 export default defineComponent({
   name: 'CatalogCategoryMatchingEdit',
   components: {
     BButton,
     BCard,
+    TableMatching,
   },
   props: {
     data: {
@@ -97,7 +99,12 @@ export default defineComponent({
     categoryMatchingRoute: {
       type: String,
       required: false,
-      default: () => global.psFacebookGetCategoryMatch || null,
+      default: () => global.psFacebookGetCatalogSummaryRoute || null,
+    },
+    getCategoriesRoute: {
+      type: String,
+      required: false,
+      default: () => global.psFacebookGetCategories || null,
     },
   },
   computed: {
@@ -105,16 +112,18 @@ export default defineComponent({
   data() {
     return {
       loading: true,
+      categories: [],
       matchingProgress: this.data ? this.data.matchingProgress : {total: '--', matched: '--'},
     };
   },
   created() {
     this.fetchData();
+    this.fetchCategories();
   },
   methods: {
     fetchData() {
       this.loading = true;
-      fetch(global.categoryMatchingRoute)
+      fetch(this.categoryMatchingRoute)
         .then((res) => {
           if (!res.ok) {
             throw new Error(res.statusText || res.status);
@@ -129,6 +138,21 @@ export default defineComponent({
           console.error(error);
         });
     },
+    fetchCategories() {
+      fetch(this.getCategoriesRoute)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(res.statusText || res.status);
+          }
+          return res.json();
+        })
+        .then((res) => {
+          this.categories = res;
+          console.log(this.categories)
+        }).catch((error) => {
+          console.error(error);
+        });
+    }
   },
   watch: {
   },
