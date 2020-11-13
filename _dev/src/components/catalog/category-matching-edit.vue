@@ -74,14 +74,14 @@
       [TODO: filter]
     </p>
 
-    <TableMatching :initialCategories="categories"/>
+    <TableMatching :initial-categories="categories" />
   </b-card>
 </template>
 
 <script>
 import {defineComponent} from '@vue/composition-api';
 import {BButton, BCard} from 'bootstrap-vue';
-import TableMatching from '../category-matching/tableMatching.vue'
+import TableMatching from '../category-matching/tableMatching.vue';
 
 export default defineComponent({
   name: 'CatalogCategoryMatchingEdit',
@@ -122,7 +122,6 @@ export default defineComponent({
   },
   methods: {
     fetchData() {
-      this.loading = true;
       fetch(this.categoryMatchingRoute)
         .then((res) => {
           if (!res.ok) {
@@ -133,26 +132,35 @@ export default defineComponent({
         .then((res) => {
           this.matchingProgress = (res && res.matchingProgress) || {total: '--', matched: '--'};
           // TODO : update others
-          this.loading = false;
         }).catch((error) => {
           console.error(error);
         });
     },
     fetchCategories() {
-      fetch(this.getCategoriesRoute)
+      this.loading = true;
+      fetch(this.getCategoriesRoute, {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'id_category=6&page=1',
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText || res.status);
+        }
+        return res.json();
+      })
         .then((res) => {
-          if (!res.ok) {
-            throw new Error(res.statusText || res.status);
-          }
-          return res.json();
-        })
-        .then((res) => {
+          res.forEach((el) => {
+            /* eslint no-param-reassign: "error" */
+            el.show = true;
+            /* eslint no-param-reassign: "error" */
+            el.shopParentCategoryIds = `${el.shopCategoryId}/`;
+          });
           this.categories = res;
-          console.log(this.categories)
+          this.loading = false;
         }).catch((error) => {
           console.error(error);
         });
-    }
+    },
   },
   watch: {
   },
