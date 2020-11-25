@@ -71,7 +71,6 @@
     </p>
 
     <p>
-      [TODO: filter]
     </p>
 
     <TableMatching :initial-categories="categories" />
@@ -140,8 +139,8 @@ export default defineComponent({
       this.loading = true;
       fetch(this.getCategoriesRoute, {
         method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: 'id_category=6&page=1',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id_category=2&page=1',
       }).then((res) => {
         if (!res.ok) {
           throw new Error(res.statusText || res.status);
@@ -152,6 +151,8 @@ export default defineComponent({
           res.forEach((el) => {
             /* eslint no-param-reassign: "error" */
             el.show = true;
+            /* eslint no-param-reassign: "error" */
+            el.googleCategoryId = parseInt(el.googleCategoryId);
             /* eslint no-param-reassign: "error" */
             el.shopParentCategoryIds = `${el.shopCategoryId}/`;
           });
