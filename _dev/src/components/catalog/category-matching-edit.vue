@@ -24,7 +24,7 @@
   <b-card
     class="card m-3"
     v-else
-    id="catalogCategoryMatchingEdit"
+    id="catalogCategoryMatchingView"
   >
     <!-- Large screen -->
     <div class="d-none d-md-block">
@@ -72,28 +72,24 @@
 
     <p />
 
-    <TableMatching :initial-categories="categories" />
+    <TableMatching :initialCategories="categories"/>
   </b-card>
 </template>
 
 <script>
 import {defineComponent} from '@vue/composition-api';
-import {BButton, BCard} from 'bootstrap-vue';
+import {BButton} from 'bootstrap-vue';
 import TableMatching from '../category-matching/tableMatching.vue';
 
+
 export default defineComponent({
-  name: 'CatalogCategoryMatchingEdit',
+  name: 'CatalogCategoryMatchingView',
   components: {
     BButton,
-    BCard,
     TableMatching,
   },
+  mixins: [],
   props: {
-    data: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     categoryMatchingRoute: {
       type: String,
       required: false,
@@ -148,9 +144,11 @@ export default defineComponent({
       })
         .then((res) => {
           res.forEach((el) => {
+            const propagation = el.isParentCategory ? true : false;
             /* eslint no-param-reassign: "error" */
             el.show = true;
             /* eslint no-param-reassign: "error" */
+            el.isParentCategory = propagation;
             el.googleCategoryId = Number(el.googleCategoryId);
             /* eslint no-param-reassign: "error" */
             el.shopParentCategoryIds = `${el.shopCategoryId}/`;
@@ -160,7 +158,7 @@ export default defineComponent({
         }).catch((error) => {
           console.error(error);
         });
-    },
+    }
   },
   watch: {
   },
