@@ -193,6 +193,11 @@ class PsFacebookTranslations
                     'fbSubcategoryName' => $this->module->l('Facebook subcategory'),
                 ]
             ],
+            'categoryMatched' => [
+                'title' => 'Enhance your catalog: category mapping',
+                'description' => 'To enhance your catalog and help customers disovers your items online, enter a Facebook product Category (FPC) for your items and then add more informations specific to each category.',
+                'btn' => 'View mapping',
+            ],
             'integrate' => [
                 'buttons' => [
                     'syncProducts' => $this->module->l('Sync products', 'PsFacebookTranslations'),
