@@ -108,7 +108,7 @@ export default defineComponent({
   data() {
     return {
       categories: this.initialCategories,
-      loading: null,
+      loading: true,
       filterCategory: false,
       numberOfCategoryWithoutMatching: 0,
     };

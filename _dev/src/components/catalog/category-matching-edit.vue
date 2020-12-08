@@ -71,7 +71,7 @@
     <b-button
       class="float-right ml-3"
       variant="primary"
-      @click="$parent.goto($parent.PAGES.categoryMatchingEdit)"
+      @click="$parent.goto($parent.PAGES.categoryMatchingView)"
     >
       Edit
     </b-button>
@@ -135,7 +135,6 @@ export default defineComponent({
         })
         .then((res) => {
           this.matchingProgress = (res && res.matchingProgress) || {total: '--', matched: '--'};
-          // TODO : update others
         }).catch((error) => {
           console.error(error);
         });

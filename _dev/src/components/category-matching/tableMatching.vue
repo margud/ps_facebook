@@ -46,6 +46,9 @@
           {{ category.shopCategoryName }}
         </editing-row>
       </b-tbody>
+      <b-tfoot v-if="loading">
+        <div class="spinner"/>
+      </b-tfoot>
     </b-table-simple>
   </div>
 </template>
@@ -106,7 +109,7 @@ export default defineComponent({
       return fetch(this.saveParentStatement, {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `id_shop_category=${category.shopCategoryId}&google_category_id=${category.fbCategoryId}&update_children=${category.propagate}`,
+        body: `category_id=${category.shopCategoryId}&google_category_id=${category.fbCategoryId}&update_children=${category.propagate}`,
       }).then((res) => {
         if (!res.ok) {
           throw new Error(res.statusText || res.status);
@@ -232,6 +235,7 @@ export default defineComponent({
       if (document.documentElement.scrollTop + window.innerHeight
           === document.documentElement.scrollHeight
       ) {
+        this.loading = true;
         fetch(this.getCategoriesRoute, {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -254,6 +258,8 @@ export default defineComponent({
               res.show = true;
               res.shopParentCategoryIds = `${res.shopCategoryId}/`;
             }
+
+            this.loading = false;
           }).catch((error) => {
             console.error(error);
           });
@@ -273,10 +279,31 @@ export default defineComponent({
     },
   },
   created() {
-    this.loading = true;
     window.addEventListener('scroll', this.handleScroll);
   },
   watch: {
   },
 });
 </script>
+<style lang="scss" scoped>
+.spinner {
+  color: #fff;
+  background-color: #fff;
+  width: 1.3rem !important;
+  height: 1.3rem !important;
+  border-radius: 2.5rem;
+  border-right-color: #25b9d7;
+  border-bottom-color: #25b9d7;
+  border-width: .1875rem;
+  border-style: solid;
+  font-size: 0;
+  outline: none;
+  display: inline-block;
+  border-left-color: #bbcdd2;
+  border-top-color: #bbcdd2;
+  -webkit-animation: rotating 2s linear infinite;
+  animation: rotating 2s linear infinite;
+  position: absolute;
+  left: calc(50% - 0.6rem);
+}
+</style>
