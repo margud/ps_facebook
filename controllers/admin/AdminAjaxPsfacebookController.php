@@ -200,6 +200,7 @@ class AdminAjaxPsfacebookController extends ModuleAdminController
 
         $categoryId = (int) Tools::getValue('category_id');
         $googleCategoryId = (int) Tools::getValue('google_category_id');
+        $googleCategoryParentId = (int) Tools::getValue('google_category_parent_id');
         $updateChildren = (bool) Tools::getValue('update_children');
         $shopId = $this->context->shop->id;
         if (!$categoryId || !$googleCategoryId) {
@@ -214,7 +215,7 @@ class AdminAjaxPsfacebookController extends ModuleAdminController
         }
         try {
             /* todo: change to data from ajax */
-            $categoryMatchHandler->updateCategoryMatch($categoryId, $googleCategoryId, $updateChildren, $shopId);
+            $categoryMatchHandler->updateCategoryMatch($categoryId, $googleCategoryId, $googleCategoryParentId, $updateChildren, $shopId);
         } catch (Exception $e) {
             $this->ajaxDie(
                 json_encode(
