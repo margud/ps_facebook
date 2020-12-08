@@ -17,10 +17,11 @@
  * International Registered Trademark & Property of PrestaShop SA
  *-->
 <template>
-  <spinner v-if="loading" />
-  <div
+  <spinner v-if="loading"/>
+  <b-card
+    class="card m-3"
     v-else
-    id="catalogCategoryMatchingEdit"
+    id="catalogCategoryMatchingView"
   >
     <!-- Large screen -->
     <div class="d-none d-md-block">
@@ -66,39 +67,27 @@
       {{ $t('categoryMatching.intro') }}
     </p>
 
-    <b-button
-      class="float-right ml-3"
-      variant="primary"
-      @click="$parent.goto($parent.PAGES.categoryMatchingEdit)"
-    >
-      Edit
-    </b-button>
+    <p />
 
-    <EditTable :initial-categories="categories" />
-
-  </div>
+    <TableMatching :initial-categories="categories" />
+  </b-card>
 </template>
 
 <script>
 import {defineComponent} from '@vue/composition-api';
 import {BButton} from 'bootstrap-vue';
+import TableMatching from '../category-matching/tableMatching.vue';
 import Spinner from '../spinner/spinner.vue';
-import EditTable from '../category-matching/editTable.vue';
 
 export default defineComponent({
-  name: 'CatalogCategoryMatchingEdit',
+  name: 'CatalogMatchingView',
   components: {
-    Spinner,
     BButton,
-    BCard,
-    EditTable,
+    Spinner,
+    TableMatching,
   },
+  mixins: [],
   props: {
-    data: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     categoryMatchingRoute: {
       type: String,
       required: false,
@@ -153,7 +142,7 @@ export default defineComponent({
       })
         .then((res) => {
           res.forEach((el) => {
-            const propagation = el.isParentCategory ? true : false;
+            const propagation = !!el.isParentCategory;
             /* eslint no-param-reassign: "error" */
             el.show = true;
             /* eslint no-param-reassign: "error" */
@@ -167,7 +156,7 @@ export default defineComponent({
         }).catch((error) => {
           console.error(error);
         });
-    }
+    },
   },
   watch: {
   },
@@ -179,16 +168,13 @@ export default defineComponent({
     border: none;
     border-radius: 3px;
     overflow: hidden;
-
     & > .card-body {
       padding: 1rem;
     }
-
     & h1 {
       margin-top: 0.2rem;
     }
   }
-
   .counter {
     &.float-right {
       text-align: right;
@@ -196,7 +182,6 @@ export default defineComponent({
     & > h3 {
       color: #CD9321 !important;
       line-height: 1;
-
       & > span {
         font-size: x-small;
         font-weight: normal;
