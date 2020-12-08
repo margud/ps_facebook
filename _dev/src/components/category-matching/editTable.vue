@@ -17,34 +17,46 @@
  * International Registered Trademark & Property of PrestaShop SA
  *-->
 <template>
-  <div class="display-table-matchingFb">
+  <div class="display-table-editTable">
+    <div class="d-none d-md-block">
+      <b-checkbox
+        :checked="filterCategory"
+        class="float-left mr-3"
+        @change="changeFilter"
+      >
+        {{ $t('categoryMatching.editTable.checkboxTxt') }} ({{ numberOfCategoryWithoutMatching }})
+      </b-checkbox>
+    </div>
     <b-table-simple :responsive="true">
       <b-thead>
         <b-tr>
-          <b-th>{{ $t('categoryMatching.tableMatching.firstTd') }}</b-th>
-          <b-th>{{ $t('categoryMatching.tableMatching.secondTd') }}</b-th>
-          <b-th>{{ $t('categoryMatching.tableMatching.thirdTd') }}</b-th>
-          <b-th>{{ $t('categoryMatching.tableMatching.fourthTd') }}</b-th>
+          <b-th>{{ $t('categoryMatching.editTable.psCategoryName') }}</b-th>
+          <b-th>{{ $t('categoryMatching.editTable.fbCategoryName') }}</b-th>
+          <b-th>{{ $t('categoryMatching.editTable.fbSubcategoryName') }}</b-th>
         </b-tr>
       </b-thead>
       <b-tbody>
-        <editing-row
+        <b-tr
           v-for="category in categories"
           v-if="category.show"
           :key="category.shopCategoryId"
-          :category-style="categoryStyle(category)"
-          :shop-category-id="category.shopCategoryId"
-          :initial-category-name="category.categoryName"
-          :initial-category-id="category.googleCategoryId"
-          :initial-subcategory-name="category.subcategoryName"
-          :initial-subcategory-id="category.googleCategoryId"
-          :initial-propagation="category.isParentCategory"
-          :autocompletion-api="'https://facebook-api.psessentials.net/taxonomy/'"
-          :save-matching-callback="saveMatchingCallback"
-          @rowClicked="getCurrentRow"
+          :class="categoryStyle(category)"
         >
-          {{ category.shopCategoryName }}
-        </editing-row>
+          <b-td
+            @click="getCurrentRow(category.shopCategoryId)"
+          >
+            {{ category.shopCategoryName }}
+          </b-td>
+          <b-td v-if="!category.googleCategoryId">
+            <b-badge variant="danger">
+              {{ $t('categoryMatching.editTable.required') }}
+            </b-badge>
+          </b-td>
+          <b-td v-else>
+            {{ category.googleCategoryId }}
+          </b-td>
+          <b-td> {{ category.subcategoryName ? category.subcategoryName : '-' }} </b-td>
+        </b-tr>
       </b-tbody>
     </b-table-simple>
   </div>
@@ -52,7 +64,7 @@
 
 <script>
 import {defineComponent} from '@vue/composition-api';
-import EditingRow from './editing-row.vue';
+import {tableMaching} from './tableMatching.vue';
 
 const PARENT_STATEMENT = {
   NO_CHILDREN: '0',
@@ -62,9 +74,9 @@ const PARENT_STATEMENT = {
 };
 
 export default defineComponent({
-  name: 'TableMatching',
+  name: 'editTable',
   components: {
-    EditingRow,
+    tableMaching,
   },
   mixins: [],
   props: {
@@ -99,6 +111,8 @@ export default defineComponent({
     return {
       categories: this.initialCategories,
       loading: null,
+      filterCategory: false,
+      numberOfCategoryWithoutMatching: 0,
     };
   },
   methods: {
@@ -122,16 +136,6 @@ export default defineComponent({
       return `array-tree-lvl-${floor.toString()} ${isDeployed}`;
     },
 
-    canShowCheckbox(category) {
-      const floor = category.shopParentCategoryIds.split('/').length - 1;
-
-      if (category.deploy === PARENT_STATEMENT.NO_CHILDREN || floor === 3) {
-        return false;
-      }
-
-      return true;
-    },
-
     getCurrentRow(currentShopCategoryID) {
       let subcategory;
       if (this.overrideGetCurrentRow) {
@@ -143,11 +147,22 @@ export default defineComponent({
         (child) => child.shopCategoryId === currentShopCategoryID,
       );
 
-      if (this.canShowCheckbox(currentCtg) === false) {
-        currentCtg.isParentCategory = null;
-      }
-
       this.setAction(currentCtg, subcategory);
+    },
+
+    changeFilter(value) {
+      this.filterCategory = value;
+
+      if (this.filterCategory === true) {
+        this.categories.forEach((el) => {
+          const result = !el.googleCategoryId;
+          el.show = result;
+        });
+      } else {
+        this.categories.forEach((el) => {
+          el.show = true;
+        });
+      }
     },
 
     /**
@@ -161,10 +176,6 @@ export default defineComponent({
       filterChildren.forEach((child) => {
         /* eslint no-param-reassign: "error" */
         child.show = true;
-        if (this.canShowCheckbox(child) === false) {
-          /* eslint no-param-reassign: "error" */
-          child.isParentCategory = null;
-        }
       });
       currentCategory.deploy = PARENT_STATEMENT.FOLD;
     },
@@ -227,38 +238,6 @@ export default defineComponent({
           console.error(error);
         });
     },
-
-    handleScroll() {
-      if (document.documentElement.scrollTop + window.innerHeight
-          === document.documentElement.scrollHeight
-      ) {
-        fetch(this.getCategoriesRoute, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'id_category=3&page=1',
-        }).then((res) => {
-          if (!res.ok) {
-            throw new Error(res.statusText || res.status);
-          }
-          return res.json();
-        })
-          .then((res) => {
-            if (Array.isArray(res)) {
-              res.forEach((el) => {
-                this.categories.push(el);
-                el.show = true;
-                el.shopParentCategoryIds = `${el.shopCategoryId}/`;
-              });
-            } else {
-              this.categories.push(res);
-              res.show = true;
-              res.shopParentCategoryIds = `${res.shopCategoryId}/`;
-            }
-          }).catch((error) => {
-            console.error(error);
-          });
-      }
-    },
     /**
     * call function
     */
@@ -269,14 +248,93 @@ export default defineComponent({
         2: () => this.showChildren(currentCategory),
         3: () => this.hideChildren(currentCategory),
       };
+
       return dictionary[currentCategory.deploy].call();
     },
   },
   created() {
-    this.loading = true;
-    window.addEventListener('scroll', this.handleScroll);
+    this.categories.forEach((el) => {
+      if (!el.googleCategoryId) {
+        this.numberOfCategoryWithoutMatching += 1;
+      }
+    });
   },
   watch: {
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.display-table-editTable {
+  table tbody tr {
+    height: 50px;
+  }
+  .opened {
+    td:first-child:before {
+      font-family: Material Icons!important;
+      font-weight: 400!important;
+      font-style: normal!important;
+      font-size: 24px!important;
+      font-size: 1.5rem!important;
+      line-height: 1!important;
+      text-transform: none!important;
+      letter-spacing: normal!important;
+      word-wrap: normal!important;
+      white-space: nowrap!important;
+      direction: ltr!important;
+      -webkit-font-smoothing: antialiased!important;
+      text-rendering: optimizeLegibility!important;
+      -moz-osx-font-smoothing: grayscale!important;
+      font-feature-settings: "liga"!important;
+      content: "expand_more"!important;
+      border: none!important;
+      display: inline-block!important;
+      vertical-align: middle!important;
+      width: auto!important;
+      line-height: 0!important;
+    }
+    td:first-child {
+      cursor: pointer!important;
+    }
+  }
+  .closed {
+    td:first-child:before {
+      font-family: Material Icons!important;
+      font-style: normal!important;
+      font-size: 15px!important;
+      font-size: 1.5rem!important;
+      line-height: 1!important;
+      text-transform: none!important;
+      letter-spacing: normal!important;
+      word-wrap: normal!important;
+      white-space: nowrap!important;
+      direction: ltr!important;
+      -webkit-font-smoothing: antialiased!important;
+      text-rendering: optimizeLegibility!important;
+      -moz-osx-font-smoothing: grayscale!important;
+      font-feature-settings: "liga"!important;
+      content: "expand_less"!important;
+      transform: rotate(90deg)!important;
+      border: none!important;
+      display: inline-block!important;
+      vertical-align: middle!important;
+      width: auto!important;
+      line-height: 0!important;
+    }
+    td:first-child {
+      cursor: pointer!important;
+    }
+  }
+
+  .array-tree-lvl-2 {
+    td:first-child {
+      padding-left:40px!important;
+    }
+  }
+  .array-tree-lvl-3 {
+    td:first-child {
+      padding-left:80px!important;
+    }
+    }
+}
+</style>

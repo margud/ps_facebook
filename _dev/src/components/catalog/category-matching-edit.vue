@@ -21,7 +21,7 @@
   <b-card
     class="card m-3"
     v-else
-    id="catalogCategoryMatchingEdit"
+    id="catalogCategoryMatchingView"
   >
     <!-- Large screen -->
     <div class="d-none d-md-block">
@@ -67,36 +67,35 @@
       {{ $t('categoryMatching.intro') }}
     </p>
 
-    <p>
-      [TODO: filter]
-    </p>
+    <p />
 
-    [TODO : table component to insert here]
+    <TableMatching :initialCategories="categories"/>
   </b-card>
 </template>
 
 <script>
 import {defineComponent} from '@vue/composition-api';
-import {BButton, BCard} from 'bootstrap-vue';
-import Spinner from '../spinner/spinner.vue';
+import {BButton} from 'bootstrap-vue';
+import TableMatching from '../category-matching/tableMatching.vue';
 
 export default defineComponent({
-  name: 'CatalogCategoryMatchingEdit',
+  name: 'CatalogCategoryMatchingView',
   components: {
     Spinner,
     BButton,
-    BCard,
+    TableMatching,
   },
+  mixins: [],
   props: {
-    data: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     categoryMatchingRoute: {
       type: String,
       required: false,
-      default: () => global.psFacebookGetCategoryMatch || null,
+      default: () => global.psFacebookGetCatalogSummaryRoute || null,
+    },
+    getCategoriesRoute: {
+      type: String,
+      required: false,
+      default: () => global.psFacebookGetCategories || null,
     },
   },
   computed: {
@@ -104,16 +103,17 @@ export default defineComponent({
   data() {
     return {
       loading: true,
+      categories: [],
       matchingProgress: this.data ? this.data.matchingProgress : {total: '--', matched: '--'},
     };
   },
   created() {
     this.fetchData();
+    this.fetchCategories();
   },
   methods: {
     fetchData() {
-      this.loading = true;
-      fetch(global.categoryMatchingRoute)
+      fetch(this.categoryMatchingRoute)
         .then((res) => {
           if (!res.ok) {
             throw new Error(res.statusText || res.status);
@@ -123,11 +123,39 @@ export default defineComponent({
         .then((res) => {
           this.matchingProgress = (res && res.matchingProgress) || {total: '--', matched: '--'};
           // TODO : update others
-          this.loading = false;
         }).catch((error) => {
           console.error(error);
         });
     },
+    fetchCategories() {
+      this.loading = true;
+      fetch(this.getCategoriesRoute, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'id_category=2&page=1',
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText || res.status);
+        }
+        return res.json();
+      })
+        .then((res) => {
+          res.forEach((el) => {
+            const propagation = el.isParentCategory ? true : false;
+            /* eslint no-param-reassign: "error" */
+            el.show = true;
+            /* eslint no-param-reassign: "error" */
+            el.isParentCategory = propagation;
+            el.googleCategoryId = Number(el.googleCategoryId);
+            /* eslint no-param-reassign: "error" */
+            el.shopParentCategoryIds = `${el.shopCategoryId}/`;
+          });
+          this.categories = res;
+          this.loading = false;
+        }).catch((error) => {
+          console.error(error);
+        });
+    }
   },
   watch: {
   },
