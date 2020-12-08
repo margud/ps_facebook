@@ -64,7 +64,6 @@
 
 <script>
 import {defineComponent} from '@vue/composition-api';
-import {tableMaching} from './tableMatching.vue';
 
 const PARENT_STATEMENT = {
   NO_CHILDREN: '0',
@@ -76,7 +75,6 @@ const PARENT_STATEMENT = {
 export default defineComponent({
   name: 'editTable',
   components: {
-    tableMaching,
   },
   mixins: [],
   props: {
