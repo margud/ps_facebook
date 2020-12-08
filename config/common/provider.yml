@@ -31,6 +31,8 @@ services:
       - '@PrestaShop\Module\PrestashopFacebook\API\FacebookClient'
       - '@PrestaShop\Module\PrestashopFacebook\Adapter\ConfigurationAdapter'
 
+  PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProviderInterface: '@PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProvider'
+
   PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProvider:
     class: PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProvider
     arguments:
