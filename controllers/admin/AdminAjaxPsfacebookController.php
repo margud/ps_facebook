@@ -19,7 +19,6 @@
  */
 
 use PrestaShop\Module\PrestashopFacebook\Adapter\ConfigurationAdapter;
-use PrestaShop\Module\PrestashopFacebook\API\FacebookCategoryClient;
 use PrestaShop\Module\PrestashopFacebook\Config\Config;
 use PrestaShop\Module\PrestashopFacebook\Config\Env;
 use PrestaShop\Module\PrestashopFacebook\Exception\FacebookOnboardException;
@@ -31,6 +30,7 @@ use PrestaShop\Module\PrestashopFacebook\Manager\FbeFeatureManager;
 use PrestaShop\Module\PrestashopFacebook\Provider\FacebookDataProvider;
 use PrestaShop\Module\PrestashopFacebook\Provider\FbeDataProvider;
 use PrestaShop\Module\PrestashopFacebook\Provider\FbeFeatureDataProvider;
+use PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProvider;
 use PrestaShop\Module\PrestashopFacebook\Provider\GoogleCategoryProviderInterface;
 use PrestaShop\Module\PrestashopFacebook\Repository\GoogleCategoryRepository;
 use PrestaShop\Module\PrestashopFacebook\Repository\ProductRepository;
@@ -228,7 +228,7 @@ class AdminAjaxPsfacebookController extends ModuleAdminController
 
         $categoryId = (int) Tools::getValue('category_id');
         $googleCategoryId = (int) Tools::getValue('google_category_id');
-        $googleCategoryName =  Tools::getValue('google_category_name');
+        $googleCategoryName = Tools::getValue('google_category_name');
         $googleCategoryParentId = (int) Tools::getValue('google_category_parent_id');
         $googleCategoryParentName = Tools::getValue('google_category_parent_name');
         $updateChildren = Tools::getValue('update_children');
@@ -384,6 +384,19 @@ class AdminAjaxPsfacebookController extends ModuleAdminController
 
         $this->ajaxDie(
             json_encode($googleCategories)
+        );
+    }
+
+    public function displayAjaxGetCategoryMatchInformation()
+    {
+        $shopId = (int) $this->context->shop->id;
+
+        /** @var GoogleCategoryProvider $googleCategoryProvider */
+        $googleCategoryProvider = $this->module->getService(GoogleCategoryProvider::class);
+        $informationAboutCategoryMatching = $googleCategoryProvider->getInformationAboutCategoryMatches($shopId);
+
+        $this->ajaxDie(
+            json_encode($informationAboutCategoryMatching)
         );
     }
 

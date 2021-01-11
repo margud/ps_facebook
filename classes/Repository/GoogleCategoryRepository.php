@@ -294,4 +294,39 @@ class GoogleCategoryRepository
 
         return (bool) Db::getInstance()->executeS($sql);
     }
+
+    /**
+     * @param int $shopId
+     *
+     * @return int
+     */
+    public function getNumberOfMatchedCategories($shopId)
+    {
+        $sql = new DbQuery();
+        $sql->select('cm.id_category');
+        $sql->from('fb_category_match', 'cm');
+        $sql->where('cm.id_shop = ' . (int) $shopId);
+
+        Db::getInstance()->execute($sql);
+
+        return Db::getInstance()->numRows();
+    }
+
+    /**
+     * @param int $shopId
+     *
+     * @return int
+     */
+    public function getNumberOfTotalCategories($shopId)
+    {
+        $sql = new DbQuery();
+        $sql->select('c.id_category');
+        $sql->from('category', 'c');
+        $sql->innerJoin('category_shop', 'cp', 'cp.id_category = c.id_category');
+        $sql->where('cp.id_shop = ' . (int) $shopId . ' AND c.id_parent >=' . (int) $this->homeCategoryId);
+
+        Db::getInstance()->execute($sql);
+
+        return Db::getInstance()->numRows();
+    }
 }

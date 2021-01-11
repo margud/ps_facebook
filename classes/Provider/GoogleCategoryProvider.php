@@ -142,4 +142,20 @@ class GoogleCategoryProvider implements GoogleCategoryProviderInterface
             }, $categories)),
         ];
     }
+
+    /**
+     * @param int $shopId
+     *
+     * @return array
+     */
+    public function getInformationAboutCategoryMatches($shopId)
+    {
+        $numberOfMatchedCategories = $this->googleCategoryRepository->getNumberOfMatchedCategories($shopId);
+        $totalCategories = $this->googleCategoryRepository->getNumberOfTotalCategories($shopId);
+
+        return [
+            'numberOfMatchedCategories' => $numberOfMatchedCategories,
+            'totalCategories' => $totalCategories,
+        ];
+    }
 }

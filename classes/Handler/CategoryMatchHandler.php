@@ -54,8 +54,7 @@ class CategoryMatchHandler
         $googleCategoryParentName,
         $updateChildren,
         $shopId
-    )
-    {
+    ) {
         if ($updateChildren === true) {
             $category = new Category($categoryId);
             $categoryChildrenIds = $category->getAllChildren();
