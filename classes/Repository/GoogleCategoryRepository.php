@@ -212,7 +212,8 @@ class GoogleCategoryRepository
         $sql->select('case when c.nleft = c.nright -1 and c.`level_depth` = ' . Config::MAX_CATEGORY_DEPTH .
             ' then ' . self::NO_CHILDREN . ' else ' . self::HAS_CHILDREN . ' end deploy');
         $sql->from('category', 'c');
-        $sql->innerJoin('category_lang', 'cl', 'c.id_category = cl.id_category AND cl.id_lang = ' . (int) $langId);
+        $sql->innerJoin('category_lang', 'cl', 'c.id_category = cl.id_category AND cl.id_lang = ' . (int) $langId .
+            ' AND cl.id_shop = ' . (int) $shopId);
         $sql->leftJoin(
             'fb_category_match',
             'cm',
@@ -227,6 +228,7 @@ class GoogleCategoryRepository
             . (int) $parentCategoryId . ' AND pc.`level_depth` >= ' . Config::MAX_CATEGORY_DEPTH . ')
             )
         ');
+        $sql->orderBy('cl.name');
         $sql->limit($limit, $offset);
 
         return Db::getInstance()->executeS($sql);
