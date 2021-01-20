@@ -295,6 +295,7 @@ class GoogleCategoryRepository
         $sql->select('cm.id_category');
         $sql->from('fb_category_match', 'cm');
         $sql->where('cm.id_shop = ' . (int) $shopId);
+        $sql->limit(1);
 
         return (bool) Db::getInstance()->executeS($sql);
     }
