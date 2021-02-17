@@ -1,10 +1,16 @@
 vendor/
 node_modules/
 upload/*
+.env.prod
+.env.inte
+.env
+dist/
+composer.phar
 
 # Ignore VueJS compiled files
 views/css/app.css
 views/js/app.js
+views/js/chunk-vendors.js
 
 ### VisualStudioCode ###
 .vscode/*
@@ -12,3 +18,12 @@ views/js/app.js
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.idea/
+
+.php_cs.cache
+.env.old-integ
+
+.idea/
+
+tests/integration/config.json
+.terraform/
