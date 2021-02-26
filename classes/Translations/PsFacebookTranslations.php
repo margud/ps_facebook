@@ -211,6 +211,7 @@ class PsFacebookTranslations
                     'fbCategoryName' => $this->module->l('Google category'),
                     'fbSubcategoryName' => $this->module->l('Google subcategory'),
                 ],
+                'errors' => $this->module->l('An error occured, they are missing data, please update the module.'),
             ],
             'categoryMatched' => [
                 'title' => $this->module->l('Enhance your catalog: category mapping'),
