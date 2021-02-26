@@ -152,7 +152,8 @@
         "secondTd" : "Google category",
         "thirdTd" : "Apply to sub-categories?",
         "fourthTd" : "Google subcategory"
-      }
+      },
+      "errors" : "An error occured, they are missing data, please update the module."
     },
     "categoryMatched" : {
       "title" : "Enhance your catalog: category mapping",

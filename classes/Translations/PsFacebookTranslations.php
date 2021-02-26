@@ -211,6 +211,7 @@ class PsFacebookTranslations
                     'fbCategoryName' => $this->module->l('Google category'),
                     'fbSubcategoryName' => $this->module->l('Google subcategory'),
                 ],
+                // TODO: The main reason at the moment is the upgrade file not run, This message may need to change later.
                 'errors' => $this->module->l('An error occured, they are missing data, please update the module.'),
             ],
             'categoryMatched' => [
