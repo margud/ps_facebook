@@ -109,6 +109,8 @@ class AdminAjaxPsfacebookController extends ModuleAdminController
         $configurationHandler->handle($onboardingData);
         $facebookContext = $facebookDataProvider->getContext($onboardingData['fbe']);
 
+        $this->configurationAdapter->updateValue(Config::PS_FACEBOOK_FORCED_DISCONNECT, false);
+
         $accessTokenProvider->refreshTokens();
 
         $this->ajaxDie(

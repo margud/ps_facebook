@@ -72,6 +72,7 @@ class FacebookDataProvider
         $productSyncStarted = (bool) $this->configurationAdapter->get(Config::PS_FACEBOOK_PRODUCT_SYNC_FIRST_START);
         $categoryMatchingStarted = false; // TODO : must be true only if all parent categories are matched !
         $catalog = new Catalog($fbe['catalog_id'], $productSyncStarted, $categoryMatchingStarted);
+        $forcedDisconnect = $this->configurationAdapter->get(Config::PS_FACEBOOK_FORCED_DISCONNECT);
 
         return new ContextPsFacebook(
             $user,
@@ -79,7 +80,8 @@ class FacebookDataProvider
             $pixel,
             $pages,
             $ad,
-            $catalog
+            $catalog,
+            $forcedDisconnect
         );
     }
 

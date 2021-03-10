@@ -61,6 +61,11 @@ class ContextPsFacebook implements JsonSerializable
     private $catalog;
 
     /**
+     * @var bool
+     */
+    private $forcedDisconnect;
+
+    /**
      * ContextPsFacebook constructor.
      *
      * @param User $user
@@ -69,8 +74,9 @@ class ContextPsFacebook implements JsonSerializable
      * @param Page|null $page
      * @param Ad|null $ad
      * @param Catalog|null $catalog
+     * @param bool $forcedDisconnect
      */
-    public function __construct($user, $facebookBusinessManager, $pixel, $page, $ad, $catalog)
+    public function __construct($user, $facebookBusinessManager, $pixel, $page, $ad, $catalog, $forcedDisconnect)
     {
         $this->user = $user;
         $this->facebookBusinessManager = $facebookBusinessManager;
@@ -78,6 +84,7 @@ class ContextPsFacebook implements JsonSerializable
         $this->page = $page;
         $this->ad = $ad;
         $this->catalog = $catalog;
+        $this->forcedDisconnect = $forcedDisconnect;
     }
 
     /**
@@ -200,6 +207,25 @@ class ContextPsFacebook implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isForcedDisconnect()
+    {
+        return $this->forcedDisconnect;
+    }
+
+    /**
+     * @param bool $forcedDisconnect
+     * @return ContextPsFacebook
+     */
+    public function setForcedDisconnect($forcedDisconnect)
+    {
+        $this->forcedDisconnect = $forcedDisconnect;
+
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         return [
@@ -209,6 +235,7 @@ class ContextPsFacebook implements JsonSerializable
             'page' => $this->getPage(),
             'ads' => $this->getAd(),
             'catalog' => $this->getCatalog(),
+            'forcedDisconnect' => $this->isForcedDisconnect()
         ];
     }
 }
